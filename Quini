@@ -1,40 +1,39 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quini 6 AI</title>
-    <style>
-        body { background: #000; color: #0f0; font-family: monospace; text-align: center; padding: 20px; }
-        .bola { display: inline-block; width: 40px; height: 40px; line-height: 40px; 
-                border: 2px solid #0f0; border-radius: 50%; margin: 5px; font-weight: bold; }
-        button { background: #0f0; color: #000; border: none; padding: 15px; width: 100%; 
-                 font-weight: bold; font-family: monospace; border-radius: 5px; cursor: pointer; }
-        #stats { color: #888; font-size: 10px; margin-top: 15px; }
-    </style>
-</head>
-<body>
-    <h2>QUINI_6_PREDICTOR_v1.0</h2>
-    <div id="display"><p>ESPERANDO_DATOS...</p></div>
-    <button onclick="razonar()">EJECUTAR_PROBABILIDAD</button>
-    <div id="stats">Basado en tendencias de 3 años</div>
+<script>
+    async function razonar() {
+        const display = document.getElementById('display');
+        display.innerHTML = "PROCESANDO_DATOS...";
 
-    <script>
-        function razonar() {
-            // Lógica de "Hot Numbers" basada en estadísticas reales (ej. 11, 14, 25, 33, 02, 41)
-            const hotNumbers = [11, 14, 25, 33, 2, 41, 10, 5, 19, 31, 45, 0];
+        try {
+            // Buscamos los datos reales del JSON que creamos
+            const response = await fetch('data.json');
+            const data = await response.json();
+            const hot = data.ultimos_3_anos.mas_frecuentes;
+
             let sugerencia = [];
-            while(sugerencia.length < 6) {
-                let n = hotNumbers[Math.floor(Math.random() * hotNumbers.length)];
+            
+            // Lógica de razonamiento: 
+            // 1. Elegimos 4 números de alta frecuencia (Hot)
+            // 2. Elegimos 2 números al azar para evitar patrones fijos
+            while(sugerencia.length < 4) {
+                let n = hot[Math.floor(Math.random() * hot.length)];
                 if(!sugerencia.includes(n)) sugerencia.push(n);
             }
+            while(sugerencia.length < 6) {
+                let n = Math.floor(Math.random() * 46);
+                if(!sugerencia.includes(n)) sugerencia.push(n);
+            }
+
             sugerencia.sort((a, b) => a - b);
-            
-            const div = document.getElementById('display');
-            div.innerHTML = '';
+
+            // Dibujamos las bolas en pantalla
+            display.innerHTML = '';
             sugerencia.forEach(num => {
-                div.innerHTML += `<div class="bola">${num < 10 ? '0'+num : num}</div>`;
+                display.innerHTML += `<div class="bola">${num < 10 ? '0'+num : num}</div>`;
             });
+
+        } catch (error) {
+            display.innerHTML = "ERROR_AL_LEER_DATA";
+            console.error(error);
         }
-    </script>
-</body>
-</html>
+    }
+</script>
